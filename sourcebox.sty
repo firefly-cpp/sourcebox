@@ -1,0 +1,28 @@
+% sourcebox.sty
+\NeedsTeXFormat{LaTeX2e}
+\ProvidesPackage{sourcebox}[2024/03/12 Provide source for figures in Beamer]
+
+\RequirePackage{xcolor}
+\RequirePackage[absolute,overlay]{textpos}
+\RequirePackage{graphicx}
+
+\newlength{\sourcetextwidth}
+\setlength{\sourcetextwidth}{7cm}
+
+% provide simple command
+\newcommand{\source}[4][right]{%
+	% #1: position (left or right)
+	% #2: text color
+	% #3: border color
+	% #4: source text
+	\begin{textblock*}{\sourcetextwidth}
+		(\ifx#1left\else\ifx#1right\else 6.8cm\fi\fi,8.6cm)
+		\begin{beamercolorbox}[ht=0.2cm,dp=0.2cm,rounded=true,shadow=true]{framesource}
+			\color{#2}\tiny
+			\ifx#3\empty\else\color{#3}\fi
+			Image source: #4
+		\end{beamercolorbox}
+	\end{textblock*}
+}
+
+\endinput
