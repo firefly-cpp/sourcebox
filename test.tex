@@ -3,12 +3,25 @@
 
 \begin{document}
 
-\begin{frame}{Test}
+\begin{frame}{Default box, bottom right}
   \begin{figure}
     \includegraphics[width=0.7\textwidth, keepaspectratio]{figs/vprasaj.pdf}
-    \source[right]{blue}{blue}{\url{https://github.com/firefly-cpp/figures}}
   \end{figure}
+  \source{\url{https://github.com/firefly-cpp/figures}}
 \end{frame}
 
+\begin{frame}{Left and center positions}
+  \begin{figure}
+    \includegraphics[width=0.7\textwidth, keepaspectratio]{figs/vprasaj.pdf}
+  \end{figure}
+  \source[left]{\url{https://github.com/firefly-cpp/figures}}
+\end{frame}
+
+\begin{frame}{Custom colors per box}
+  \begin{figure}
+    \includegraphics[width=0.7\textwidth, keepaspectratio]{figs/vprasaj.pdf}
+  \end{figure}
+  \sourcestyled[center]{white}{blue!55!black}{\url{https://github.com/firefly-cpp/figures}}
+\end{frame}
 
 \end{document}

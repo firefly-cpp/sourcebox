@@ -1,28 +1,93 @@
 % sourcebox.sty
+%
+% Nicely styled source/attribution boxes for beamer slides.
+%
+% Usage:
+%   \source{https://example.com}                  % bottom right (default)
+%   \source[left]{https://example.com}            % bottom left
+%   \source[center]{https://example.com}          % bottom center
+%   \sourcestyled[right]{white}{blue!60!black}{...} % per-call fg/bg colors
+%
+% Customization:
+%   \sourceboxcolors{<fg>}{<bg>}      set default text/background colors
+%   \renewcommand{\sourceboxprefix}{Vir:~}   change the "Image source:" label
+%   \setlength{\sourceboxwidth}{6cm}  box width
+%   \setlength{\sourceboxvpos}{8.8cm} vertical position (from top of slide)
+%   \setlength{\sourceboxmargin}{4mm} horizontal margin from slide edge
+%
 \NeedsTeXFormat{LaTeX2e}
-\ProvidesPackage{sourcebox}[2024/03/12 Provide source for figures in Beamer]
+\ProvidesPackage{sourcebox}[2026/07/19 v1.1 Source attribution boxes for beamer]
 
 \RequirePackage{xcolor}
 \RequirePackage[absolute,overlay]{textpos}
-\RequirePackage{graphicx}
+\RequirePackage{ifthen}
 
-\newlength{\sourcetextwidth}
-\setlength{\sourcetextwidth}{7cm}
+% ---------------------------------------------------------------------------
+% Dimensions (all customizable with \setlength)
+% ---------------------------------------------------------------------------
+\newlength{\sourceboxwidth}
+\setlength{\sourceboxwidth}{7cm}
 
-% provide simple command
-\newcommand{\source}[4][right]{%
-	% #1: position (left or right)
-	% #2: text color
-	% #3: border color
-	% #4: source text
-	\begin{textblock*}{\sourcetextwidth}
-		(\ifx#1left\else\ifx#1right\else 6.8cm\fi\fi,8.6cm)
-		\begin{beamercolorbox}[ht=0.2cm,dp=0.2cm,rounded=true,shadow=true]{framesource}
-			\color{#2}\tiny
-			\ifx#3\empty\else\color{#3}\fi
-			Image source: #4
-		\end{beamercolorbox}
-	\end{textblock*}
+\newlength{\sourceboxvpos}          % distance from the top of the slide
+\setlength{\sourceboxvpos}{8.8cm}   % beamer paper is 12.8cm x 9.6cm
+
+\newlength{\sourceboxmargin}        % gap between box and slide edge
+\setlength{\sourceboxmargin}{4mm}
+
+% ---------------------------------------------------------------------------
+% Colors: define the beamer color used by the box, with sensible defaults.
+% ---------------------------------------------------------------------------
+\providecolor{sourceboxfg}{RGB}{80,80,80}
+\providecolor{sourceboxbg}{RGB}{242,242,242}
+\setbeamercolor{framesource}{fg=sourceboxfg,bg=sourceboxbg}
+
+% \sourceboxcolors{<fg>}{<bg>} -- change the default colors document-wide
+\newcommand{\sourceboxcolors}[2]{%
+  \setbeamercolor{framesource}{fg=#1,bg=#2}%
+}
+
+% Prefix label, renewable (e.g. "Source:", "Vir:", "Quelle:")
+\newcommand{\sourceboxprefix}{Image source:~}
+
+% ---------------------------------------------------------------------------
+% Internal: compute the x coordinate for left / right / center
+% ---------------------------------------------------------------------------
+\newlength{\sourcebox@xpos}
+\newcommand{\sourcebox@setxpos}[1]{%
+  \ifthenelse{\equal{#1}{left}}%
+    {\setlength{\sourcebox@xpos}{\sourceboxmargin}}%
+    {\ifthenelse{\equal{#1}{center}}%
+      {\setlength{\sourcebox@xpos}{\dimexpr0.5\paperwidth-0.5\sourceboxwidth\relax}}%
+      {\setlength{\sourcebox@xpos}{\dimexpr\paperwidth-\sourceboxwidth-\sourceboxmargin\relax}}}% right (default)
+}
+
+% Internal: the box itself
+\newcommand{\sourcebox@render}[2]{%
+  % #1 position keyword, #2 source text
+  \sourcebox@setxpos{#1}%
+  \begin{textblock*}{\sourceboxwidth}(\sourcebox@xpos,\sourceboxvpos)%
+    \begin{beamercolorbox}[sep=0.6ex,wd=\sourceboxwidth,rounded=true,shadow=true]{framesource}%
+      \centering\tiny\sourceboxprefix#2%
+    \end{beamercolorbox}%
+  \end{textblock*}%
+}
+
+% ---------------------------------------------------------------------------
+% Public commands
+% ---------------------------------------------------------------------------
+
+% \source[left|center|right]{<source text>}
+\newcommand{\source}[2][right]{%
+  \sourcebox@render{#1}{#2}%
+}
+
+% \sourcestyled[left|center|right]{<fg color>}{<bg color>}{<source text>}
+% One-off colors for a single box, without touching the global defaults.
+\newcommand{\sourcestyled}[4][right]{%
+  \begingroup
+    \setbeamercolor{framesource}{fg=#2,bg=#3}%
+    \sourcebox@render{#1}{#4}%
+  \endgroup
 }
 
 \endinput
